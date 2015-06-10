@@ -33,7 +33,7 @@ class TickerGenerator:
 
     # returns a symbol
     def generate_symbol(self, ticker, current_price, option_type, strike_price, expiration_date):
-        return ticker + expiration_date.today().strftime('%y%m%d') + option_type[0] + '%08d' % (strike_price*1000)
+        return ticker + expiration_date.strftime('%y%m%d') + option_type[0] + '%08d' % (strike_price*1000)
 
     # returns a list of generated ProcessedTickers.
     def generate_tickers(self, ticker, current_price):
@@ -52,18 +52,17 @@ class TickerGenerator:
         # lowest strike price
         strike_price = current_price * (1-self.strike_range) // increment * increment
 
-        # list of three third fridays of the month
-        expiration_dates = self.generate_dates(3)
+        # list of five third fridays of the month
+        expiration_dates = self.generate_dates(5)
 
         # Create ProcessedTickers.
         processed_tickers = [];
-        for expiration_date in expiration_dates:
+        for exp_date in expiration_dates:
             for option_type in option_types:
                 c_strike_price = strike_price
                 while c_strike_price < current_price * (1+self.strike_range):
-                    symbol = self.generate_symbol(ticker, current_price, option_type, c_strike_price, expiration_date)
-                    p = ProcessedTicker.ProcessedTicker(ticker, current_price, option_type, symbol, c_strike_price, expiration_date, roundup)
-                    processed_tickers.append(p)
+                    symbol = self.generate_symbol(ticker, current_price, option_type, c_strike_price, exp_date)
+                    processed_tickers.append(ProcessedTicker.ProcessedTicker(ticker, current_price, option_type, symbol, c_strike_price, exp_date, roundup))
                     c_strike_price += increment;
 
         return processed_tickers
